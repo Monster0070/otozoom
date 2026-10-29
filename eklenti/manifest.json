@@ -1,0 +1,67 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_ad__",
+  "version": "1.0.0",
+  "description": "__MSG_aciklama__",
+  "icons": {
+    "16": "ikon16.png",
+    "32": "ikon32.png",
+    "128": "ikon128.png"
+  },
+  "permissions": [
+    "alarms",
+    "storage",
+    "notifications",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://*.zoom.us/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.zoom.us/wc/*"
+      ],
+      "js": [
+        "ayar.js",
+        "kapat.js",
+        "giris.js"
+      ],
+      "all_frames": true,
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.zoom.us/j/*",
+        "https://*.zoom.us/my/*",
+        "https://*.zoom.us/s/*"
+      ],
+      "js": [
+        "giris.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": {
+      "16": "ikon16.png",
+      "32": "ikon32.png"
+    },
+    "default_title": "__MSG_ad__"
+  },
+  "default_locale": "en",
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "popup.html"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}

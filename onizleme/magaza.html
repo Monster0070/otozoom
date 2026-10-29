@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Mağaza görseli</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1280px; height: 800px; overflow: hidden; }
+  body { font-family: "Lato", -apple-system, "Segoe UI", system-ui, sans-serif; color: #fff;
+    background: linear-gradient(135deg, #0b5cff 0%, #2d7bff 55%, #6aa5ff 100%);
+    display: grid; grid-template-columns: 1fr 400px; align-items: center; gap: 72px; padding: 0 96px; position: relative; }
+  body::before, body::after { content: ""; position: absolute; border-radius: 50%; background: rgba(255,255,255,.08); }
+  body::before { width: 620px; height: 620px; right: -160px; top: -240px; }
+  body::after { width: 380px; height: 380px; left: -120px; bottom: -200px; }
+  .metin { position: relative; z-index: 1; }
+  .metin img { width: 88px; height: 88px; border-radius: 22px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+  h1 { font-size: 54px; line-height: 1.08; margin: 28px 0 18px; font-weight: 900; letter-spacing: -.5px; }
+  p { font-size: 22px; line-height: 1.5; margin: 0; opacity: .92; max-width: 560px; }
+  ul { list-style: none; padding: 0; margin: 30px 0 0; display: grid; gap: 12px; font-size: 19px; font-weight: 700; }
+  li { display: flex; gap: 12px; align-items: center; }
+  li::before { content: ""; width: 22px; height: 22px; border-radius: 50%; flex: none;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='%230b5cff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat; }
+  .pencere { position: relative; z-index: 1; width: 360px; height: 680px; border-radius: 18px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,20,80,.35), 0 0 0 1px rgba(255,255,255,.25); background: #f7f9fa; justify-self: center; }
+  iframe { width: 360px; height: 680px; border: 0; display: block; }
+</style>
+</head>
+<body>
+  <div class="metin">
+    <img src="../eklenti/ikon128.png" alt="">
+    <h1 id="baslik">Derslerine zamanında,<br>kendiliğinden gir.</h1>
+    <p id="alt">Gün ve saati bir kez seç. Ders başladığında eklenti Zoom toplantısını kendi hesabınla açar.</p>
+    <ul id="maddeler">
+      <li>Seçtiğin günlerde otomatik katılım</li>
+      <li>Kamera ve mikrofon kapalı giriş</li>
+      <li>Toplantı şifresini kendisi girer</li>
+    </ul>
+  </div>
+  <div class="pencere"><iframe id="cerceve"></iframe></div>
+  <script>
+    const ing = new URLSearchParams(location.search).get("dil") === "en";
+    document.getElementById("cerceve").src = "index.html" + (ing ? "?dil=en" : "");
+    const yaz = (id, html) => (document.getElementById(id).innerHTML = html);
+    if (ing) {
+      document.documentElement.lang = "en";
+      yaz("baslik", "Join your classes<br>on time, automatically.");
+      yaz("alt", "Pick the day and time once. When class starts, the extension opens the Zoom meeting with your own account.");
+      yaz("maddeler", "<li>Auto-join on the days you choose</li><li>Camera and mic off when you join</li><li>Enters the meeting passcode for you</li>");
+    }
+    // Görüntü alırken pencereye sığdır: sol üstte 1280x800 oranında kalır
+    const olcek = Math.min(innerWidth / 1280, innerHeight / 800);
+    document.documentElement.style.cssText = `transform: scale(${olcek}); transform-origin: 0 0;`;
+    document.getElementById("cerceve").addEventListener("load", (e) => {
+      e.target.contentDocument.getElementById("tost").style.display = "none";
+      // Görüntü alırken geçişler beklenmesin: form ve liste hemen son hâlinde görünsün
+      const st = e.target.contentDocument.createElement("style");
+      st.textContent = "*, *::before, *::after { transition: none !important; animation: none !important; caret-color: transparent !important; }";
+      e.target.contentDocument.head.appendChild(st);
+    });
+    if (location.hash === "#form") {
+      if (ing) {
+        yaz("baslik", "Add it once,<br>join every week.");
+        yaz("alt", "Enter the class name, days, time and meeting details. Edit or pause it any time.");
+        yaz("maddeler", "<li>Meeting ID or invite link</li><li>Uses your open Zoom tab</li><li>Data stays in your browser</li>");
+      } else {
+        yaz("baslik", "Bir kez ekle,<br>her hafta katıl.");
+        yaz("alt", "Ders adını, günleri, saati ve toplantı bilgisini gir. İstediğin zaman düzenleyebilir ya da kapatabilirsin.");
+        yaz("maddeler", "<li>Toplantı kimliği ya da davet linki</li><li>Açık Zoom sekmesini kullanır</li><li>Bilgiler yalnız tarayıcında kalır</li>");
+      }
+      const c = document.getElementById("cerceve");
+      c.addEventListener("load", () => setTimeout(() => {
+        const w = c.contentWindow;
+        w.chrome.storage.local.get("toplantilar").then(({ toplantilar }) => {
+          w.formuAc(toplantilar[0]);
+          setTimeout(() => { scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0; }, 400);
+        });
+      }, 300));
+    }
+  </script>
+</body>
+</html>
